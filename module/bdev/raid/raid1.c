@@ -375,64 +375,27 @@ raid1_submit_process_request(struct raid_bdev_process_request *process_req,
 static void
 raid1_base_io_complete(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg)
 {
-    struct raid_bdev_io *raid_io = cb_arg;
+	struct raid_bdev_io *raid_io = cb_arg;
 
-    if (!success) {
-        /* If any base device I/O operation fails, mark the RAID I/O operation as failed. */
-        raid_io->status = SPDK_BDEV_IO_STATUS_FAILED;
-    }
+	raid_bdev_io_complete_part(raid_io, 1, success ?
+				   SPDK_BDEV_IO_STATUS_SUCCESS :
+				   SPDK_BDEV_IO_STATUS_FAILED);
 
-    raid_io->base_bdev_io_remaining--;
-
-    if (raid_io->base_bdev_io_remaining == 0) {
-        /* All base device I/O operations have completed. */
-        raid_bdev_io_complete(raid_io, raid_io->status);
-    }
-
-    spdk_bdev_free_io(bdev_io);
-}
-
-static inline void
-_raid1_get_io_range(struct raid_bdev_io_range *io_range,
-            uint8_t num_base_bdevs, uint64_t strip_size, uint64_t strip_size_shift,
-            uint64_t offset_blocks, uint64_t num_blocks)
-{
-    uint64_t	total_blocks;
-
-    io_range->strip_size = strip_size;
-    total_blocks = offset_blocks + num_blocks;
-
-    /* The start and end block index in raid1 bdev scope */
-    io_range->start_offset_in_strip = offset_blocks;
-    io_range->end_offset_in_strip = total_blocks;
-
-    /* The base bdev indexes in which start and end blocks are located */
-    io_range->start_disk = 0;
-    io_range->end_disk = num_base_bdevs - 1;
-
-    /* Calculate how many base_bdevs are involved in io operation.
-     * In RAID 1, all base bdevs are involved.
-     */
-    io_range->n_disks_involved = num_base_bdevs;
+	spdk_bdev_free_io(bdev_io);
 }
 
 void raid1_submit_null_payload_request(struct raid_bdev_io *raid_io)
 {
     struct raid_bdev		*raid_bdev;
-    struct raid_bdev_io_range	io_range;
     int				ret;
     struct raid_base_bdev_info	*base_info;
     struct spdk_io_channel		*base_ch;
 
     raid_bdev = raid_io->raid_bdev;
 
-    _raid1_get_io_range(&io_range, raid_bdev->num_base_bdevs,
-                raid_bdev->strip_size, raid_bdev->strip_size_shift,
-                raid_io->offset_blocks, raid_io->num_blocks);
-
-    if (raid_io->base_bdev_io_remaining == 0) {
-        raid_io->base_bdev_io_remaining = io_range.n_disks_involved;
-    }
+    // if (raid_io->base_bdev_io_remaining == 0) {
+    //     raid_io->base_bdev_io_remaining = io_range.n_disks_involved;
+    // }
 
     for (uint8_t disk_idx = 0; disk_idx < raid_bdev->num_base_bdevs; disk_idx++) {
         base_info = &raid_bdev->base_bdev_info[disk_idx];
