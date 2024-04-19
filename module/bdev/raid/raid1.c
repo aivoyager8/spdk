@@ -394,7 +394,6 @@ _raid1_submit_null_payload_request(void *_raid_io)
 	raid1_submit_null_payload_request(raid_io);
 }
 
-
 void raid1_submit_null_payload_request(struct raid_bdev_io *raid_io)
 {
     struct raid_bdev		*raid_bdev;
