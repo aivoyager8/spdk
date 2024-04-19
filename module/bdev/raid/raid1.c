@@ -403,9 +403,9 @@ void raid1_submit_null_payload_request(struct raid_bdev_io *raid_io)
 
     raid_bdev = raid_io->raid_bdev;
 
-    // if (raid_io->base_bdev_io_remaining == 0) {
-    //     raid_io->base_bdev_io_remaining = io_range.n_disks_involved;
-    // }
+    if (raid_io->base_bdev_io_remaining == 0) {
+         raid_io->base_bdev_io_remaining = raid_bdev->num_base_bdevs;
+    }
 
     for (uint8_t disk_idx = 0; disk_idx < raid_bdev->num_base_bdevs; disk_idx++) {
         base_info = &raid_bdev->base_bdev_info[disk_idx];
