@@ -384,6 +384,17 @@ raid1_base_io_complete(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg)
 	spdk_bdev_free_io(bdev_io);
 }
 
+static void raid1_submit_null_payload_request(struct raid_bdev_io *raid_io);
+
+static void
+_raid1_submit_null_payload_request(void *_raid_io)
+{
+	struct raid_bdev_io *raid_io = _raid_io;
+
+	raid1_submit_null_payload_request(raid_io);
+}
+
+
 void raid1_submit_null_payload_request(struct raid_bdev_io *raid_io)
 {
     struct raid_bdev		*raid_bdev;
