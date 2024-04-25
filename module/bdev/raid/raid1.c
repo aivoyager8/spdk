@@ -169,6 +169,7 @@ raid1_submit_write_request(struct raid_bdev_io *raid_io)
 			/* skip a missing base bdev's slot */
 			raid_io->base_bdev_io_submitted++;
 			raid_bdev_io_complete_part(raid_io, 1, SPDK_BDEV_IO_STATUS_SUCCESS);
+			SPDK_NOTICELOG("Skip a missing base bdev's slot\n");
 			continue;
 		}
 
