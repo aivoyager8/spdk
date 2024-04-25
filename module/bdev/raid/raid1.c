@@ -184,6 +184,7 @@ raid1_submit_write_request(struct raid_bdev_io *raid_io)
 				return 0;
 			}
 
+			SPDK_ERRLOG("raid1_submit_write_request failed, index %u\n", idx);
 			base_bdev_io_not_submitted = raid_bdev->num_base_bdevs -
 						     raid_io->base_bdev_io_submitted;
 			raid_bdev_io_complete_part(raid_io, base_bdev_io_not_submitted,
