@@ -400,6 +400,7 @@ _raid1_submit_null_payload_request(void *_raid_io)
 
 void raid1_submit_null_payload_request(struct raid_bdev_io *raid_io)
 {
+	SPDK_ERRLOG("raid1_submit_null_payload_request called.\n");
     struct raid_bdev		*raid_bdev;
     int				ret;
     struct raid_base_bdev_info	*base_info;
@@ -414,6 +415,14 @@ void raid1_submit_null_payload_request(struct raid_bdev_io *raid_io)
     for (uint8_t disk_idx = 0; disk_idx < raid_bdev->num_base_bdevs; disk_idx++) {
         base_info = &raid_bdev->base_bdev_info[disk_idx];
         base_ch = raid_bdev_channel_get_base_channel(raid_io->raid_ch, disk_idx);
+
+		if (base_ch == NULL) {
+			/* skip a missing base bdev's slot */
+			raid_io->base_bdev_io_submitted++;
+			raid_bdev_io_complete_part(raid_io, 1, SPDK_BDEV_IO_STATUS_SUCCESS);
+			SPDK_ERRLOG("skip a missing base bdev's slot\n");
+			continue;
+		}
 
         switch (raid_io->type) {
         case SPDK_BDEV_IO_TYPE_UNMAP:
