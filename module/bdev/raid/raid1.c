@@ -148,6 +148,7 @@ raid1_submit_read_request(struct raid_bdev_io *raid_io)
 static int
 raid1_submit_write_request(struct raid_bdev_io *raid_io)
 {
+	SPDK_ERRLOG("raid1_submit_write_request called.\n");
 	struct raid_bdev *raid_bdev = raid_io->raid_bdev;
 	struct spdk_bdev_ext_io_opts io_opts;
 	struct raid_base_bdev_info *base_info;
@@ -197,6 +198,7 @@ raid1_submit_write_request(struct raid_bdev_io *raid_io)
 		ret = -ENODEV;
 	}
 
+	SPDK_ERRLOG("raid1_submit_write_request return %d\n", ret);
 	return ret;
 }
 
